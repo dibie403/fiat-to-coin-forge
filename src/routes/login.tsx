@@ -21,6 +21,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const hydrated = useHydrated();
   const [email, setEmail] = useState("demo@brokr.io");
   const [password, setPassword] = useState("demo123");
   const [loading, setLoading] = useState(false);
