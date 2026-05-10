@@ -57,8 +57,8 @@ function LoginPage() {
             <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in…" : "Sign in"}
+          <Button type="submit" className="w-full" disabled={loading || !hydrated}>
+            {!hydrated ? "Loading…" : loading ? "Signing in…" : "Sign in"}
           </Button>
         </form>
         <p className="mt-6 text-sm text-muted-foreground">
