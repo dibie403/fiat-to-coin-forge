@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useHydrated } from "@/hooks/useHydrated";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/register")({
 function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const hydrated = useHydrated();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,8 +66,8 @@ function RegisterPage() {
             <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Creating…" : "Create account"}
+          <Button type="submit" className="w-full" disabled={loading || !hydrated}>
+            {!hydrated ? "Loading…" : loading ? "Creating…" : "Create account"}
           </Button>
         </form>
         <p className="mt-6 text-sm text-muted-foreground">

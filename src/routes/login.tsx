@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useHydrated } from "@/hooks/useHydrated";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const hydrated = useHydrated();
   const [email, setEmail] = useState("demo@brokr.io");
   const [password, setPassword] = useState("demo123");
   const [loading, setLoading] = useState(false);
@@ -55,8 +57,8 @@ function LoginPage() {
             <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in…" : "Sign in"}
+          <Button type="submit" className="w-full" disabled={loading || !hydrated}>
+            {!hydrated ? "Loading…" : loading ? "Signing in…" : "Sign in"}
           </Button>
         </form>
         <p className="mt-6 text-sm text-muted-foreground">
