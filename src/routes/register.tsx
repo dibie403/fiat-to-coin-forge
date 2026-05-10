@@ -21,6 +21,7 @@ export const Route = createFileRoute("/register")({
 function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const hydrated = useHydrated();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
