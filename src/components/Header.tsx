@@ -32,15 +32,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
-            O
-          </div>
-          <span className="text-lg font-semibold tracking-tight">
-            <span className="hidden sm:inline">Orji Funds Exchange</span>
-            <span className="sm:hidden">Orji FX</span>
-          </span>
-        </Link>
+        <Logo size="sm" />
+
 
         <nav className="hidden md:flex items-center gap-1 text-sm">
           {isAuthenticated && (
