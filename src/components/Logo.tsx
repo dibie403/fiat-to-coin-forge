@@ -103,6 +103,7 @@ function Mark({ px }: { px: number }) {
 
 export function Logo({ size = "md", showWordmark = true, asLink = true, className = "" }: Props) {
   const s = sizes[size];
+  const { isAuthenticated } = useAuth();
 
   const wordmark = (
     <>
