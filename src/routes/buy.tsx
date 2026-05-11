@@ -13,7 +13,7 @@ import type { Crypto } from "@/services/mockData";
 import { formatCrypto, formatNGN } from "@/utils/format";
 
 export const Route = createFileRoute("/buy")({
-  head: () => ({ meta: [{ title: "Buy crypto — Brokr" }] }),
+  head: () => ({ meta: [{ title: "Buy crypto — Orji Funds Exchange" }] }),
   component: BuyPage,
 });
 

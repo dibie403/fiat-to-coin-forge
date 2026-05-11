@@ -11,8 +11,8 @@ import { useHydrated } from "@/hooks/useHydrated";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Sign in — Brokr" },
-      { name: "description", content: "Sign in to your Brokr account." },
+      { title: "Sign in — Orji Funds Exchange" },
+      { name: "description", content: "Sign in to your Orji Funds Exchange account." },
     ],
   }),
   component: LoginPage,

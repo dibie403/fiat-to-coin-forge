@@ -11,8 +11,8 @@ import { useHydrated } from "@/hooks/useHydrated";
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Create account — Brokr" },
-      { name: "description", content: "Create your Brokr crypto brokerage account." },
+      { title: "Create account — Orji Funds Exchange" },
+      { name: "description", content: "Create your Orji Funds Exchange crypto brokerage account." },
     ],
   }),
   component: RegisterPage,
