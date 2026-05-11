@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Logo } from "@/components/Logo";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -6,15 +7,8 @@ export function Footer() {
     <footer className="border-t border-border/60 bg-card/40 mt-16">
       <div className="mx-auto max-w-6xl px-4 py-12 grid gap-8 md:grid-cols-4">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
-              O
-            </div>
-            <span className="text-lg font-semibold tracking-tight">
-              Orji Funds Exchange
-            </span>
-          </div>
-          <p className="mt-3 max-w-sm text-sm text-muted-foreground">
+          <Logo size="md" asLink={false} />
+          <p className="mt-4 max-w-sm text-sm text-muted-foreground">
             Buy and sell Bitcoin, Ethereum and USDT with naira. Transparent
             rates, real humans, lightning-fast settlements.
           </p>
