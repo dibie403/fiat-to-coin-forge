@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useAuth } from "@/context/AuthContext";
 
 type Props = {
   size?: "sm" | "md" | "lg";
@@ -102,6 +103,7 @@ function Mark({ px }: { px: number }) {
 
 export function Logo({ size = "md", showWordmark = true, asLink = true, className = "" }: Props) {
   const s = sizes[size];
+  const { isAuthenticated } = useAuth();
 
   const wordmark = (
     <>
@@ -153,7 +155,7 @@ export function Logo({ size = "md", showWordmark = true, asLink = true, classNam
 
   return (
     <Link
-      to="/"
+      to={isAuthenticated ? "/dashboard" : "/"}
       className={`inline-flex items-center gap-2.5 group ${className}`}
       aria-label="Orji Funds Exchange — home"
     >
