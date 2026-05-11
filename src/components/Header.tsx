@@ -3,6 +3,7 @@ import { Moon, Sun, LogOut, LayoutDashboard, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 
 export function Header() {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
