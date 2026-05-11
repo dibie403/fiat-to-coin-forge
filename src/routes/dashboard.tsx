@@ -11,7 +11,7 @@ import type { Crypto, Transaction } from "@/services/mockData";
 import { formatNGN } from "@/utils/format";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Brokr" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Orji Funds Exchange" }] }),
   component: Dashboard,
 });
 

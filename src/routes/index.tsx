@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Brokr — Buy & sell crypto with naira" },
+      { title: "Orji Funds Exchange — Buy & sell crypto with naira" },
       {
         name: "description",
         content:
-          "Brokr is a fast, simple crypto brokerage. Buy and sell BTC, ETH, and USDT with naira in minutes.",
+          "Orji Funds Exchange is a fast, simple crypto brokerage. Buy and sell BTC, ETH, and USDT with naira in minutes.",
       },
-      { property: "og:title", content: "Brokr — Buy & sell crypto with naira" },
+      { property: "og:title", content: "Orji Funds Exchange — Buy & sell crypto with naira" },
       {
         property: "og:description",
         content: "Buy and sell BTC, ETH, and USDT with naira in minutes.",

@@ -17,7 +17,7 @@ import type { Crypto, Transaction, User } from "@/services/mockData";
 import { formatCrypto, formatDate, formatNGN } from "@/utils/format";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — Brokr" }] }),
+  head: () => ({ meta: [{ title: "Admin — Orji Funds Exchange" }] }),
   component: AdminPage,
 });
 
