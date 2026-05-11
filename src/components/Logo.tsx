@@ -154,7 +154,7 @@ export function Logo({ size = "md", showWordmark = true, asLink = true, classNam
 
   return (
     <Link
-      to="/"
+      to={isAuthenticated ? "/dashboard" : "/"}
       className={`inline-flex items-center gap-2.5 group ${className}`}
       aria-label="Orji Funds Exchange — home"
     >
