@@ -3,6 +3,20 @@ export interface Crypto {
   name: string;
   rate: number; // NGN per unit
   change24h: number;
+  image?: string;
+  marketCap?: number;
+  volume24h?: number;
+  high24h?: number;
+  low24h?: number;
+  circulatingSupply?: number;
+  totalSupply?: number;
+  maxSupply?: number | null;
+  ath?: number;
+  athDate?: string;
+  atl?: number;
+  atlDate?: string;
+  sparkline7d?: number[];
+  rank?: number;
 }
 
 export interface User {

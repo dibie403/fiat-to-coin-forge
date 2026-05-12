@@ -125,17 +125,39 @@ function readOverrides(): Record<string, number> {
   return read<Record<string, number>>(LS_OVERRIDES, {});
 }
 
-async function fetchLiveRates(): Promise<Record<string, { rate: number; change24h: number }> | null> {
+interface MarketRow {
+  id: string;
+  symbol: string;
+  name: string;
+  image: string;
+  current_price: number;
+  market_cap: number;
+  market_cap_rank: number;
+  total_volume: number;
+  high_24h: number;
+  low_24h: number;
+  price_change_percentage_24h: number;
+  circulating_supply: number;
+  total_supply: number | null;
+  max_supply: number | null;
+  ath: number;
+  ath_date: string;
+  atl: number;
+  atl_date: string;
+  sparkline_in_7d?: { price: number[] };
+}
+
+async function fetchLiveMarkets(): Promise<Record<string, MarketRow> | null> {
   try {
     const ids = Object.values(COINGECKO_IDS).join(",");
-    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=ngn&include_24hr_change=true`;
+    const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=ngn&ids=${ids}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`;
     const res = await fetch(url);
     if (!res.ok) return null;
-    const data = (await res.json()) as Record<string, { ngn: number; ngn_24h_change?: number }>;
-    const out: Record<string, { rate: number; change24h: number }> = {};
+    const data = (await res.json()) as MarketRow[];
+    const out: Record<string, MarketRow> = {};
     for (const [sym, id] of Object.entries(COINGECKO_IDS)) {
-      const row = data[id];
-      if (row?.ngn) out[sym] = { rate: row.ngn, change24h: row.ngn_24h_change ?? 0 };
+      const row = data.find((d) => d.id === id);
+      if (row) out[sym] = row;
     }
     return out;
   } catch {
@@ -143,17 +165,50 @@ async function fetchLiveRates(): Promise<Record<string, { rate: number; change24
   }
 }
 
+export interface CoinChartPoint { t: number; price: number; }
+export async function getCoinChart(symbol: string, days = 7): Promise<CoinChartPoint[]> {
+  const id = COINGECKO_IDS[symbol];
+  if (!id) return [];
+  try {
+    const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=ngn&days=${days}`;
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = (await res.json()) as { prices: [number, number][] };
+    return data.prices.map(([t, price]) => ({ t, price }));
+  } catch {
+    return [];
+  }
+}
+
 export async function getRates(): Promise<Crypto[]> {
   const stored = read<Crypto[]>(LS.rates, initialRates);
   const overrides = readOverrides();
-  const live = await fetchLiveRates();
+  const live = await fetchLiveMarkets();
   const merged = stored.map((r) => {
-    if (overrides[r.symbol] != null) return { ...r, rate: overrides[r.symbol] };
-    if (live && live[r.symbol]) {
-      return { ...r, rate: Math.round(live[r.symbol].rate), change24h: Number(live[r.symbol].change24h.toFixed(2)) };
-    }
-    // fallback: tiny jitter so UI feels live
-    return { ...r, rate: Math.round(r.rate * (1 + (Math.random() - 0.5) * 0.002)) };
+    const row = live?.[r.symbol];
+    const base: Crypto = row
+      ? {
+          ...r,
+          rate: Math.round(row.current_price),
+          change24h: Number((row.price_change_percentage_24h ?? 0).toFixed(2)),
+          image: row.image,
+          marketCap: row.market_cap,
+          volume24h: row.total_volume,
+          high24h: row.high_24h,
+          low24h: row.low_24h,
+          circulatingSupply: row.circulating_supply,
+          totalSupply: row.total_supply ?? undefined,
+          maxSupply: row.max_supply,
+          ath: row.ath,
+          athDate: row.ath_date,
+          atl: row.atl,
+          atlDate: row.atl_date,
+          sparkline7d: row.sparkline_in_7d?.price,
+          rank: row.market_cap_rank,
+        }
+      : { ...r, rate: Math.round(r.rate * (1 + (Math.random() - 0.5) * 0.002)) };
+    if (overrides[r.symbol] != null) base.rate = overrides[r.symbol];
+    return base;
   });
   write(LS.rates, merged);
   return merged;
