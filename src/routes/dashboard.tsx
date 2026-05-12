@@ -75,15 +75,23 @@ function Dashboard() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {rates.map((c) => {
               const up = c.change24h >= 0;
+              const spark = (c.sparkline7d ?? []).map((p, i) => ({ i, p }));
               return (
-                <div
+                <Link
                   key={c.symbol}
-                  className="rounded-xl border border-border bg-card p-5 transition hover:border-primary/40"
+                  to="/asset/$symbol"
+                  params={{ symbol: c.symbol }}
+                  className="group rounded-xl border border-border bg-card p-5 transition hover:border-primary/40 hover:shadow-lg"
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground">{c.name}</p>
-                      <p className="text-lg font-semibold">{c.symbol}</p>
+                    <div className="flex items-center gap-3">
+                      {c.image && (
+                        <img src={c.image} alt={c.name} className="h-9 w-9 rounded-full" />
+                      )}
+                      <div>
+                        <p className="text-xs text-muted-foreground">{c.name}</p>
+                        <p className="text-lg font-semibold">{c.symbol}</p>
+                      </div>
                     </div>
                     <span
                       className={`flex items-center gap-1 text-xs font-medium ${
@@ -95,10 +103,51 @@ function Dashboard() {
                       {c.change24h.toFixed(2)}%
                     </span>
                   </div>
-                  <p className="mt-4 text-2xl font-bold tabular-nums">
-                    {formatNGN(c.rate)}
-                  </p>
-                </div>
+
+                  <p className="mt-4 text-2xl font-bold tabular-nums">{formatNGN(c.rate)}</p>
+
+                  {spark.length > 1 && (
+                    <div className="mt-3 h-12 -mx-1">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={spark} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
+                          <defs>
+                            <linearGradient id={`sp-${c.symbol}`} x1="0" y1="0" x2="0" y2="1">
+                              <stop
+                                offset="0%"
+                                stopColor={up ? "oklch(0.78 0.18 150)" : "oklch(0.65 0.2 25)"}
+                                stopOpacity={0.5}
+                              />
+                              <stop
+                                offset="100%"
+                                stopColor={up ? "oklch(0.78 0.18 150)" : "oklch(0.65 0.2 25)"}
+                                stopOpacity={0}
+                              />
+                            </linearGradient>
+                          </defs>
+                          <Area
+                            type="monotone"
+                            dataKey="p"
+                            stroke={up ? "oklch(0.78 0.18 150)" : "oklch(0.65 0.2 25)"}
+                            strokeWidth={1.5}
+                            fill={`url(#sp-${c.symbol})`}
+                            isAnimationActive={false}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider">Mkt cap</p>
+                      <p className="text-foreground">{c.marketCap ? formatCompactNGN(c.marketCap) : "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider">24h vol</p>
+                      <p className="text-foreground">{c.volume24h ? formatCompactNGN(c.volume24h) : "—"}</p>
+                    </div>
+                  </div>
+                </Link>
               );
             })}
           </div>
