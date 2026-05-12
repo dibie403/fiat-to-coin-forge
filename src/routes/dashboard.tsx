@@ -32,7 +32,7 @@ function Dashboard() {
       setTxs(t);
     };
     refresh();
-    const id = setInterval(() => getRates().then((r) => live && setRates(r)), 5000);
+    const id = setInterval(() => getRates().then((r) => live && setRates(r)), 30_000);
     return () => {
       live = false;
       clearInterval(id);
