@@ -125,21 +125,58 @@ function readOverrides(): Record<string, number> {
   return read<Record<string, number>>(LS_OVERRIDES, {});
 }
 
-async function fetchLiveRates(): Promise<Record<string, { rate: number; change24h: number }> | null> {
+interface MarketRow {
+  id: string;
+  symbol: string;
+  name: string;
+  image: string;
+  current_price: number;
+  market_cap: number;
+  market_cap_rank: number;
+  total_volume: number;
+  high_24h: number;
+  low_24h: number;
+  price_change_percentage_24h: number;
+  circulating_supply: number;
+  total_supply: number | null;
+  max_supply: number | null;
+  ath: number;
+  ath_date: string;
+  atl: number;
+  atl_date: string;
+  sparkline_in_7d?: { price: number[] };
+}
+
+async function fetchLiveMarkets(): Promise<Record<string, MarketRow> | null> {
   try {
     const ids = Object.values(COINGECKO_IDS).join(",");
-    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=ngn&include_24hr_change=true`;
+    const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=ngn&ids=${ids}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`;
     const res = await fetch(url);
     if (!res.ok) return null;
-    const data = (await res.json()) as Record<string, { ngn: number; ngn_24h_change?: number }>;
-    const out: Record<string, { rate: number; change24h: number }> = {};
+    const data = (await res.json()) as MarketRow[];
+    const out: Record<string, MarketRow> = {};
     for (const [sym, id] of Object.entries(COINGECKO_IDS)) {
-      const row = data[id];
-      if (row?.ngn) out[sym] = { rate: row.ngn, change24h: row.ngn_24h_change ?? 0 };
+      const row = data.find((d) => d.id === id);
+      if (row) out[sym] = row;
     }
     return out;
   } catch {
     return null;
+  }
+}
+
+export interface CoinChartPoint { t: number; price: number; }
+export async function getCoinChart(symbol: string, days = 7): Promise<CoinChartPoint[]> {
+  const id = COINGECKO_IDS[symbol];
+  if (!id) return [];
+  try {
+    const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=ngn&days=${days}`;
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = (await res.json()) as { prices: [number, number][] };
+    return data.prices.map(([t, price]) => ({ t, price }));
+  } catch {
+    return [];
   }
 }
 
