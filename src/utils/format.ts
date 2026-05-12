@@ -13,3 +13,14 @@ export const formatDate = (iso: string) =>
     dateStyle: "medium",
     timeStyle: "short",
   });
+
+export const formatCompactNGN = (n: number) =>
+  new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    notation: "compact",
+    maximumFractionDigits: 2,
+  }).format(n);
+
+export const formatCompact = (n: number) =>
+  new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 2 }).format(n);
