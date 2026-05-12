@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowDownRight, ArrowUpRight, TrendingUp, TrendingDown } from "lucide-react";
+import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { Header } from "@/components/Header";
 import { TransactionTable } from "@/components/TransactionTable";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { getRates, getUserTransactions } from "@/services/api";
 import type { Crypto, Transaction } from "@/services/mockData";
-import { formatNGN } from "@/utils/format";
+import { formatCompactNGN, formatNGN } from "@/utils/format";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Orji Funds Exchange" }] }),
