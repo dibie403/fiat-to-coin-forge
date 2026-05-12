@@ -183,14 +183,32 @@ export async function getCoinChart(symbol: string, days = 7): Promise<CoinChartP
 export async function getRates(): Promise<Crypto[]> {
   const stored = read<Crypto[]>(LS.rates, initialRates);
   const overrides = readOverrides();
-  const live = await fetchLiveRates();
+  const live = await fetchLiveMarkets();
   const merged = stored.map((r) => {
-    if (overrides[r.symbol] != null) return { ...r, rate: overrides[r.symbol] };
-    if (live && live[r.symbol]) {
-      return { ...r, rate: Math.round(live[r.symbol].rate), change24h: Number(live[r.symbol].change24h.toFixed(2)) };
-    }
-    // fallback: tiny jitter so UI feels live
-    return { ...r, rate: Math.round(r.rate * (1 + (Math.random() - 0.5) * 0.002)) };
+    const row = live?.[r.symbol];
+    const base: Crypto = row
+      ? {
+          ...r,
+          rate: Math.round(row.current_price),
+          change24h: Number((row.price_change_percentage_24h ?? 0).toFixed(2)),
+          image: row.image,
+          marketCap: row.market_cap,
+          volume24h: row.total_volume,
+          high24h: row.high_24h,
+          low24h: row.low_24h,
+          circulatingSupply: row.circulating_supply,
+          totalSupply: row.total_supply ?? undefined,
+          maxSupply: row.max_supply,
+          ath: row.ath,
+          athDate: row.ath_date,
+          atl: row.atl,
+          atlDate: row.atl_date,
+          sparkline7d: row.sparkline_in_7d?.price,
+          rank: row.market_cap_rank,
+        }
+      : { ...r, rate: Math.round(r.rate * (1 + (Math.random() - 0.5) * 0.002)) };
+    if (overrides[r.symbol] != null) base.rate = overrides[r.symbol];
+    return base;
   });
   write(LS.rates, merged);
   return merged;
