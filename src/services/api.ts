@@ -114,22 +114,66 @@ export async function listUsers(): Promise<Omit<User, "password">[]> {
 }
 
 // ---------- RATES ----------
+const COINGECKO_IDS: Record<string, string> = {
+  BTC: "bitcoin",
+  ETH: "ethereum",
+  USDT: "tether",
+};
+const LS_OVERRIDES = "brokr.rate_overrides";
+
+function readOverrides(): Record<string, number> {
+  return read<Record<string, number>>(LS_OVERRIDES, {});
+}
+
+async function fetchLiveRates(): Promise<Record<string, { rate: number; change24h: number }> | null> {
+  try {
+    const ids = Object.values(COINGECKO_IDS).join(",");
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=ngn&include_24hr_change=true`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = (await res.json()) as Record<string, { ngn: number; ngn_24h_change?: number }>;
+    const out: Record<string, { rate: number; change24h: number }> = {};
+    for (const [sym, id] of Object.entries(COINGECKO_IDS)) {
+      const row = data[id];
+      if (row?.ngn) out[sym] = { rate: row.ngn, change24h: row.ngn_24h_change ?? 0 };
+    }
+    return out;
+  } catch {
+    return null;
+  }
+}
+
 export async function getRates(): Promise<Crypto[]> {
-  await delay(200);
-  // simulate small live fluctuation
-  const rates = read<Crypto[]>(LS.rates, initialRates).map((r) => ({
-    ...r,
-    rate: Math.round(r.rate * (1 + (Math.random() - 0.5) * 0.002)),
-  }));
-  return rates;
+  const stored = read<Crypto[]>(LS.rates, initialRates);
+  const overrides = readOverrides();
+  const live = await fetchLiveRates();
+  const merged = stored.map((r) => {
+    if (overrides[r.symbol] != null) return { ...r, rate: overrides[r.symbol] };
+    if (live && live[r.symbol]) {
+      return { ...r, rate: Math.round(live[r.symbol].rate), change24h: Number(live[r.symbol].change24h.toFixed(2)) };
+    }
+    // fallback: tiny jitter so UI feels live
+    return { ...r, rate: Math.round(r.rate * (1 + (Math.random() - 0.5) * 0.002)) };
+  });
+  write(LS.rates, merged);
+  return merged;
 }
 
 export async function updateRate(symbol: string, rate: number): Promise<Crypto[]> {
   await delay();
+  const overrides = readOverrides();
+  overrides[symbol] = rate;
+  write(LS_OVERRIDES, overrides);
   const rates = read<Crypto[]>(LS.rates, initialRates);
   const next = rates.map((r) => (r.symbol === symbol ? { ...r, rate } : r));
   write(LS.rates, next);
   return next;
+}
+
+export async function clearRateOverride(symbol: string): Promise<void> {
+  const overrides = readOverrides();
+  delete overrides[symbol];
+  write(LS_OVERRIDES, overrides);
 }
 
 export function getStoredRates(): Crypto[] {
