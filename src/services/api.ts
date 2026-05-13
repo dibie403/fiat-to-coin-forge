@@ -186,29 +186,33 @@ export async function getRates(): Promise<Crypto[]> {
   const live = await fetchLiveMarkets();
   const merged = stored.map((r) => {
     const row = live?.[r.symbol];
-    const base: Crypto = row
-      ? {
-          ...r,
-          rate: Math.round(row.current_price),
-          change24h: Number((row.price_change_percentage_24h ?? 0).toFixed(2)),
-          image: row.image,
-          marketCap: row.market_cap,
-          volume24h: row.total_volume,
-          high24h: row.high_24h,
-          low24h: row.low_24h,
-          circulatingSupply: row.circulating_supply,
-          totalSupply: row.total_supply ?? undefined,
-          maxSupply: row.max_supply,
-          ath: row.ath,
-          athDate: row.ath_date,
-          atl: row.atl,
-          atlDate: row.atl_date,
-          sparkline7d: row.sparkline_in_7d?.price,
-          rank: row.market_cap_rank,
-        }
-      : { ...r, rate: Math.round(r.rate * (1 + (Math.random() - 0.5) * 0.002)) };
-    if (overrides[r.symbol] != null) base.rate = overrides[r.symbol];
-    return base;
+    if (row) {
+      // Live data ALWAYS wins. Overrides are ignored when CoinGecko responds.
+      return {
+        ...r,
+        rate: row.current_price,
+        change24h: Number((row.price_change_percentage_24h ?? 0).toFixed(2)),
+        image: row.image,
+        marketCap: row.market_cap,
+        volume24h: row.total_volume,
+        high24h: row.high_24h,
+        low24h: row.low_24h,
+        circulatingSupply: row.circulating_supply,
+        totalSupply: row.total_supply ?? undefined,
+        maxSupply: row.max_supply,
+        ath: row.ath,
+        athDate: row.ath_date,
+        atl: row.atl,
+        atlDate: row.atl_date,
+        sparkline7d: row.sparkline_in_7d?.price,
+        rank: row.market_cap_rank,
+      } satisfies Crypto;
+    }
+    // Live API failed — fall back to admin override, then last cached value.
+    return {
+      ...r,
+      rate: overrides[r.symbol] ?? r.rate,
+    };
   });
   write(LS.rates, merged);
   return merged;
